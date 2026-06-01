@@ -12,6 +12,27 @@ office.config.json
 .claude/scheduled_tasks.lock
 .playwright-mcp/
 
+# Local generated previews and image-edit scratch files
+/*-preview*.png
+/*-screenshot*.png
+/*-crop*.png
+/glass-*.png
+/orbit-real-mode-live.png
+/plant-region-before.png
+/public_rooms_*.png
+/right-cabinet-wide-before.png
+/room-restored-after-glass-rollback.png
+/verification/
+/zindex-*.png
+/public/rooms/_before*/
+/public/rooms/_city_view_backup/
+/public/rooms/_pre_glass_reflection_patch/
+/public/rooms/*-source.png
+/public/sprites/_debugger*/
+/public/sprites/_orbital_greenhouse_backup/
+/public/sprites/characters/*-sheet-*.png
+/public/sprites/characters/unified-space-crew/
+
 # graphify
 graphify-out/cache/
 graphify-out/.graphify_*

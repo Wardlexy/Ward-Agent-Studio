@@ -8,13 +8,17 @@ import AgentInspector from './components/AgentInspector'
 import MissionQueue from './components/MissionQueue'
 import RoomPropPanel from './components/RoomPropPanel'
 import WardMissionControl from './components/WardMissionControl'
+import AgentTerminals, { type AgentTerminalLine, type TerminalTarget } from './components/AgentTerminals'
+import CaseStudyOutput from './components/CaseStudyOutput'
 import { Agent, OfficeEvent, AGENT_CONFIGS } from './types'
 import { getCurrentPhase, getPhaseLabel, type DayPhase } from './daylight'
 import { ROOMS, type RoomId } from './rooms'
-import type { RoomPropKind } from './ops/types'
+import type { MissionTask, RoomPropKind } from './ops/types'
 import { createDemoMissions } from './ops/missions'
 import { advanceMissions, getTaskForAgent, statusLabel } from './ops/agentOps'
-import { createMissionFromTemplate } from './portfolio/missionTemplates'
+import { createMissionFromTemplate, RECOMMENDED_STUDENT_TEMPLATE_ID } from './portfolio/missionTemplates'
+import { CASE_STUDY_TEMPLATE_ID, caseStudyTerminalScript, createCaseStudyMissionTasks } from './portfolio/caseStudyData'
+import type { PortfolioArtifactResult } from './portfolio/types'
 import { useAgentSocket } from './hooks/useAgentSocket'
 import * as sfx from './sounds'
 import {
@@ -63,6 +67,30 @@ function timeNow(): string {
 
 let nextMsgId = 1
 function makeMsgId() { return nextMsgId++ }
+
+function agentTerminalReply(agent: Agent, prompt: string, task?: MissionTask): string {
+  const lower = prompt.toLowerCase()
+  const currentTask = task?.title ?? agent.task ?? 'standby work'
+
+  if (lower.includes('status') || lower.includes('progress') || lower.includes('lagi apa')) {
+    return `status: ${task ? statusLabel(task.status) : agent.state}; working on ${currentTask}.`
+  }
+  if (lower.includes('next') || lower.includes('step') || lower.includes('lanjut')) {
+    if (agent.role.includes('coordinator')) return 'next: rank Ward’s current projects, pick one to polish, then write the smallest next action.'
+    if (agent.role.includes('systems') || agent.role.includes('builder') || agent.role.includes('developer')) return 'next: polish the repo proof: README, setup steps, screenshots, and roadmap.'
+    if (agent.role.includes('field') || agent.role.includes('test') || agent.role.includes('qa')) return 'next: turn the project into internship proof: demo path, skill gaps, and application bullets.'
+    if (agent.role.includes('mission') || agent.role.includes('research')) return 'next: make a one-week skill sprint with practice, notes, and proof of progress.'
+    return 'next: summarize the current state and write one useful action.'
+  }
+  if (lower.includes('idea') || lower.includes('portfolio')) {
+    return 'portfolio angle: choose finishable student projects, make them screenshot-friendly, and explain them clearly in GitHub and CV language.'
+  }
+  if (lower.includes('build') || lower.includes('code')) {
+    return 'build note: keep the change small, run the build, then log what changed so it becomes proof for the portfolio.'
+  }
+
+  return `ack: I will fold that into ${currentTask} and report the next useful result.`
+}
 
 // Room spots for main office
 const MAIN_ROOM = ROOMS['main-office']
@@ -165,11 +193,11 @@ function createCodex(): Agent {
 }
 
 const STATION_CREW = [
-  { id: 'station-ops-captain', role: 'station-ops-captain', spotId: 'station-ops', task: 'Polishing portfolio stories' },
-  { id: 'station-systems-engineer', role: 'station-systems-engineer', spotId: 'station-systems', task: 'Planning build work' },
-  { id: 'station-coordinator', role: 'station-coordinator', spotId: 'station-strategy', task: 'Keeping the mission plan tidy' },
-  { id: 'station-mission-specialist', role: 'station-mission-specialist', spotId: 'station-research', task: 'Researching ideas and job targets' },
-  { id: 'station-field-tech', role: 'station-field-tech', spotId: 'station-field', task: 'Testing portfolio flows' },
+  { id: 'station-ops-captain', name: 'Deck Coach', role: 'station-ops-captain', spotId: 'station-ops', task: 'Turning project work into portfolio stories' },
+  { id: 'station-systems-engineer', name: 'Deck GitHub', role: 'station-systems-engineer', spotId: 'station-systems', task: 'Polishing repo proof' },
+  { id: 'station-coordinator', name: 'Deck Finder', role: 'station-coordinator', spotId: 'station-strategy', task: 'Ranking current projects' },
+  { id: 'station-mission-specialist', name: 'Deck Mentor', role: 'station-mission-specialist', spotId: 'station-research', task: 'Planning weekly skill sprints' },
+  { id: 'station-field-tech', name: 'Deck Scout', role: 'station-field-tech', spotId: 'station-field', task: 'Mapping internship next steps' },
 ] as const
 
 function createStationCrew(): Agent[] {
@@ -179,7 +207,7 @@ function createStationCrew(): Agent[] {
     const position = { x: spot.x, y: spot.y }
     return {
       id: crew.id,
-      name: cfg.title,
+      name: crew.name,
       type: 'subagent',
       role: crew.role,
       state: 'working' as const,
@@ -201,11 +229,11 @@ function createStationCrew(): Agent[] {
 }
 
 const QUANTUM_CREW = [
-  { id: 'quantum-ops-captain', role: 'station-ops-captain', spotId: 'quantum-left-console', task: 'Packaging project proof' },
-  { id: 'quantum-systems-engineer', role: 'station-systems-engineer', spotId: 'quantum-reactor-left', task: 'Building app features' },
-  { id: 'quantum-coordinator', role: 'station-coordinator', spotId: 'quantum-front-left', task: 'Coordinating lab procedures' },
-  { id: 'quantum-mission-specialist', role: 'station-mission-specialist', spotId: 'quantum-reactor-right', task: 'Researching implementation options' },
-  { id: 'quantum-field-tech', role: 'station-field-tech', spotId: 'quantum-front-right', task: 'Running UI smoke checks' },
+  { id: 'quantum-ops-captain', name: 'Portfolio Coach', role: 'station-ops-captain', spotId: 'quantum-left-console', task: 'Packaging project proof' },
+  { id: 'quantum-systems-engineer', name: 'GitHub Polish', role: 'station-systems-engineer', spotId: 'quantum-reactor-left', task: 'Cleaning README and demo proof' },
+  { id: 'quantum-coordinator', name: 'Project Finder', role: 'station-coordinator', spotId: 'quantum-front-left', task: 'Ranking Ward’s current projects' },
+  { id: 'quantum-mission-specialist', name: 'Skill Mentor', role: 'station-mission-specialist', spotId: 'quantum-reactor-right', task: 'Building a realistic learning sprint' },
+  { id: 'quantum-field-tech', name: 'Internship Scout', role: 'station-field-tech', spotId: 'quantum-front-right', task: 'Preparing internship-ready proof' },
 ] as const
 
 function createQuantumCrew(): Agent[] {
@@ -215,7 +243,7 @@ function createQuantumCrew(): Agent[] {
     const position = { x: spot.x, y: spot.y }
     return {
       id: crew.id,
-      name: cfg.title,
+      name: crew.name,
       type: 'subagent',
       role: crew.role,
       state: 'working' as const,
@@ -237,11 +265,11 @@ function createQuantumCrew(): Agent[] {
 }
 
 const GREENHOUSE_CREW = [
-  { id: 'greenhouse-ops-captain', role: 'station-ops-captain', spotId: 'greenhouse-wall-left', task: 'Curating portfolio ideas' },
-  { id: 'greenhouse-systems-engineer', role: 'station-systems-engineer', spotId: 'greenhouse-bio-left', task: 'Shaping buildable concepts' },
-  { id: 'greenhouse-coordinator', role: 'station-coordinator', spotId: 'greenhouse-front-console', task: 'Scheduling learning sprints' },
-  { id: 'greenhouse-mission-specialist', role: 'station-mission-specialist', spotId: 'greenhouse-right-row', task: 'Growing research notes' },
-  { id: 'greenhouse-field-tech', role: 'station-field-tech', spotId: 'greenhouse-right-lower-row', task: 'Checking demo readiness' },
+  { id: 'greenhouse-ops-captain', name: 'Grow Coach', role: 'station-ops-captain', spotId: 'greenhouse-wall-left', task: 'Curating project proof ideas' },
+  { id: 'greenhouse-systems-engineer', name: 'Grow GitHub', role: 'station-systems-engineer', spotId: 'greenhouse-bio-left', task: 'Shaping repo polish tasks' },
+  { id: 'greenhouse-coordinator', name: 'Grow Finder', role: 'station-coordinator', spotId: 'greenhouse-front-console', task: 'Sorting buildable project ideas' },
+  { id: 'greenhouse-mission-specialist', name: 'Grow Mentor', role: 'station-mission-specialist', spotId: 'greenhouse-right-row', task: 'Growing learning notes' },
+  { id: 'greenhouse-field-tech', name: 'Grow Scout', role: 'station-field-tech', spotId: 'greenhouse-right-lower-row', task: 'Checking internship readiness' },
 ] as const
 
 function createGreenhouseCrew(): Agent[] {
@@ -251,7 +279,7 @@ function createGreenhouseCrew(): Agent[] {
     const position = { x: spot.x, y: spot.y }
     return {
       id: crew.id,
-      name: cfg.title,
+      name: crew.name,
       type: 'subagent',
       role: crew.role,
       state: 'working' as const,
@@ -280,9 +308,7 @@ const ROOM_PROP_HOTSPOTS: Array<{
   position: { x: number; y: number }
 }> = [
   { id: 'office-today-board', roomId: 'main-office', kind: 'today', label: 'Ward Mission Control', position: { x: 80, y: 42 } },
-  { id: 'station-mission-console', roomId: 'station-command', kind: 'mission', label: 'Mission Queue', position: { x: 55, y: 55 } },
   { id: 'quantum-build-console', roomId: 'quantum-core', kind: 'build', label: 'Build/Test Logs', position: { x: 50, y: 58 } },
-  { id: 'greenhouse-idea-pod', roomId: 'orbital-greenhouse', kind: 'ideas', label: 'Ideas / Research Backlog', position: { x: 50, y: 57 } },
 ]
 
 // How close (in %-units) an agent must be to their target before we consider
@@ -425,6 +451,11 @@ const App: React.FC = () => {
   const [openRoomProp, setOpenRoomProp] = useState<RoomPropKind | null>(null)
   const [missionQueueOpen, setMissionQueueOpen] = useState(false)
   const [wardMissionOpen, setWardMissionOpen] = useState(false)
+  const [agentTerminalsOpen, setAgentTerminalsOpen] = useState(false)
+  const [caseStudyOutputOpen, setCaseStudyOutputOpen] = useState(false)
+  const [caseStudyArtifactResult, setCaseStudyArtifactResult] = useState<PortfolioArtifactResult | null>(null)
+  const [activeTerminalTarget, setActiveTerminalTarget] = useState<TerminalTarget>('broadcast')
+  const [terminalLines, setTerminalLines] = useState<AgentTerminalLine[]>([])
   const agentMetaRef = useRef<Map<string, AgentMeta>>(new Map([
     [BOSS_ID, { spawnedAt: Date.now(), arrivedAtDeskAt: Date.now(), idleSince: null, onBreak: false, breakStartedAt: null }],
     [CLAUDE_ID, { spawnedAt: Date.now(), arrivedAtDeskAt: Date.now(), idleSince: null, onBreak: false, breakStartedAt: null }],
@@ -458,13 +489,14 @@ const App: React.FC = () => {
   const isGreenhouseRoom = currentRoom === 'orbital-greenhouse'
   const isMainOfficeRoom = currentRoom === 'main-office'
   const allOpsAgents = useMemo(
-    () => [...agents, ...stationAgents, ...quantumAgents, ...greenhouseAgents],
-    [agents, stationAgents, quantumAgents, greenhouseAgents],
+    () => [...agents, ...quantumAgents],
+    [agents, quantumAgents],
   )
   const selectedAgent = selectedAgentId
     ? allOpsAgents.find(agent => agent.id === selectedAgentId) ?? null
     : null
   const selectedAgentTask = selectedAgent ? getTaskForAgent(selectedAgent, missionTasks) : undefined
+  const caseStudyReady = missionTasks.some(task => task.id.includes(CASE_STUDY_TEMPLATE_ID))
 
   const handleFurnitureClick = useCallback((itemId: string) => {
     const interaction = getInteraction(itemId)
@@ -608,27 +640,308 @@ const App: React.FC = () => {
     }])
   }, [])
 
+  const runCaseStudyArtifactJob = useCallback(async () => {
+    const timestamp = timeNow()
+    setTerminalLines(prev => [
+      ...prev,
+      {
+        id: makeMsgId(),
+        agentId: 'assistant-claude',
+        author: 'agent' as const,
+        text: 'Starting real artifact job: writing case study markdown files into docs/case-study.',
+        timestamp,
+      },
+    ].slice(-220))
+
+    try {
+      const response = await fetch('http://127.0.0.1:3334/portfolio/case-study', { method: 'POST' })
+      if (!response.ok) {
+        const message = await response.text()
+        throw new Error(message || `Artifact service failed with ${response.status}`)
+      }
+
+      const result = await response.json() as PortfolioArtifactResult & { ok?: boolean }
+      setCaseStudyArtifactResult(result)
+
+      const artifactPaths = result.artifacts.map(artifact => artifact.path).join(', ')
+      setMissionTasks(prev => prev.map(task => {
+        if (!task.id.includes(CASE_STUDY_TEMPLATE_ID)) return task
+        const isWriter = task.assignedAgentId === 'assistant-claude' || task.assignedAgentId === 'quantum-ops-captain'
+        return {
+          ...task,
+          progress: isWriter ? Math.max(task.progress, 88) : task.progress,
+          lastAction: isWriter ? 'Wrote real portfolio artifact files' : task.lastAction,
+          resultSummary: result.summary,
+          outputSummary: `${result.summary} Files: ${artifactPaths}`,
+          log: [...task.log.slice(-4), `Real artifact: ${artifactPaths}`],
+          updatedAt: Date.now(),
+        }
+      }))
+
+      setTerminalLines(prev => [
+        ...prev,
+        {
+          id: makeMsgId(),
+          agentId: 'assistant-claude',
+          author: 'agent' as const,
+          text: `Real files written: ${artifactPaths}`,
+          timestamp: timeNow(),
+        },
+        {
+          id: makeMsgId(),
+          agentId: 'quantum-ops-captain',
+          author: 'agent' as const,
+          text: 'Student portfolio package is now usable outside the app: markdown artifacts are in the workspace.',
+          timestamp: timeNow(),
+        },
+      ].slice(-220))
+
+      addMsg('Archivist', 'assistant', AGENT_CONFIGS.assistant?.color ?? '#d8d8d8', `real artifact files written: ${artifactPaths}`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown artifact writer error'
+      setMissionTasks(prev => prev.map(task => task.id.includes(CASE_STUDY_TEMPLATE_ID) && task.assignedAgentId === 'assistant-claude'
+        ? {
+            ...task,
+            status: 'blocked' as const,
+            lastAction: 'Artifact writer could not run',
+            log: [...task.log.slice(-4), `Artifact writer failed: ${message}`],
+            updatedAt: Date.now(),
+          }
+        : task,
+      ))
+      setTerminalLines(prev => [
+        ...prev,
+        {
+          id: makeMsgId(),
+          agentId: 'assistant-claude',
+          author: 'agent' as const,
+          text: `Artifact writer blocked: ${message}`,
+          timestamp: timeNow(),
+        },
+      ].slice(-220))
+      addMsg('Archivist', 'assistant', AGENT_CONFIGS.assistant?.color ?? '#d8d8d8', `artifact writer blocked: ${message}`)
+    }
+  }, [addMsg])
+
+  const runProjectAuditJob = useCallback(async () => {
+    const timestamp = timeNow()
+    setTerminalLines(prev => [
+      ...prev,
+      {
+        id: makeMsgId(),
+        agentId: 'quantum-coordinator',
+        author: 'agent' as const,
+        text: 'Starting real project audit: scanning local folders and ranking portfolio value.',
+        timestamp,
+      },
+    ].slice(-220))
+
+    try {
+      const response = await fetch('http://127.0.0.1:3334/portfolio/project-audit', { method: 'POST' })
+      if (!response.ok) {
+        const message = await response.text()
+        throw new Error(message || `Project audit failed with ${response.status}`)
+      }
+
+      const result = await response.json() as PortfolioArtifactResult & {
+        ok?: boolean
+        topProjects?: Array<{ name: string; score: number; nextAction: string }>
+      }
+      setCaseStudyArtifactResult(result)
+
+      const artifactPaths = result.artifacts.map(artifact => artifact.path).join(', ')
+      const topProject = result.topProjects?.[0]
+      setMissionTasks(prev => prev.map(task => {
+        if (!task.id.includes(RECOMMENDED_STUDENT_TEMPLATE_ID)) return task
+        return {
+          ...task,
+          progress: Math.max(task.progress, 92),
+          status: 'reviewing' as const,
+          lastAction: topProject
+            ? `Project audit done: polish ${topProject.name} first`
+            : 'Project audit done: no local projects found yet',
+          resultSummary: result.summary,
+          outputSummary: `${result.summary} Files: ${artifactPaths}`,
+          log: [
+            ...task.log.slice(-4),
+            topProject ? `Top project: ${topProject.name} (${topProject.score}/100)` : 'No top project found',
+            `Real artifact: ${artifactPaths}`,
+          ],
+          updatedAt: Date.now(),
+        }
+      }))
+
+      setTerminalLines(prev => [
+        ...prev,
+        {
+          id: makeMsgId(),
+          agentId: 'quantum-coordinator',
+          author: 'agent' as const,
+          text: topProject
+            ? `Best project to polish first: ${topProject.name} (${topProject.score}/100).`
+            : 'Project audit finished, but no project folders were detected.',
+          timestamp: timeNow(),
+        },
+        {
+          id: makeMsgId(),
+          agentId: 'quantum-systems-engineer',
+          author: 'agent' as const,
+          text: `Real audit files written: ${artifactPaths}`,
+          timestamp: timeNow(),
+        },
+      ].slice(-220))
+
+      setCaseStudyOutputOpen(true)
+      addMsg('Project Finder', 'station-coordinator', AGENT_CONFIGS['station-coordinator']?.color ?? '#d8d8d8', result.summary)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown project audit error'
+      setMissionTasks(prev => prev.map(task => task.id.includes(RECOMMENDED_STUDENT_TEMPLATE_ID)
+        ? {
+            ...task,
+            status: 'blocked' as const,
+            lastAction: 'Project audit could not run',
+            log: [...task.log.slice(-4), `Project audit failed: ${message}`],
+            updatedAt: Date.now(),
+          }
+        : task,
+      ))
+      setTerminalLines(prev => [
+        ...prev,
+        {
+          id: makeMsgId(),
+          agentId: 'quantum-coordinator',
+          author: 'agent' as const,
+          text: `Project audit blocked: ${message}`,
+          timestamp: timeNow(),
+        },
+      ].slice(-220))
+      addMsg('Project Finder', 'station-coordinator', AGENT_CONFIGS['station-coordinator']?.color ?? '#d8d8d8', `project audit blocked: ${message}`)
+    }
+  }, [addMsg])
+
   const handleStartPortfolioMission = useCallback((templateId: string) => {
     const now = Date.now()
-    const mission = createMissionFromTemplate(templateId, now)
-    if (!mission) return
+    const missions = templateId === CASE_STUDY_TEMPLATE_ID
+      ? createCaseStudyMissionTasks(now)
+      : (() => {
+          const mission = createMissionFromTemplate(templateId, now)
+          return mission ? [mission] : []
+        })()
+    if (missions.length === 0) return
 
     let didStart = false
     setMissionTasks(prev => {
       const alreadyRunning = prev.some(task => task.id.includes(templateId) && task.status !== 'done')
       if (alreadyRunning) return prev
       didStart = true
-      return [mission, ...prev].slice(0, 12)
+      return [...missions, ...prev].slice(0, 18)
     })
 
     setTimeout(() => {
       setWardMissionOpen(false)
       setMissionQueueOpen(true)
       if (!didStart) return
-      const cfg = AGENT_CONFIGS[mission.assignedRole ?? 'station-coordinator'] ?? AGENT_CONFIGS.default
-      addMsg(cfg.title, mission.assignedRole ?? 'station-coordinator', cfg.color, `started portfolio mission: ${mission.title}`)
+      const primaryMission = missions[0]
+      const cfg = AGENT_CONFIGS[primaryMission.assignedRole ?? 'station-coordinator'] ?? AGENT_CONFIGS.default
+      addMsg(cfg.title, primaryMission.assignedRole ?? 'station-coordinator', cfg.color, `started portfolio mission: ${primaryMission.title}`)
+
+      if (templateId === CASE_STUDY_TEMPLATE_ID) {
+        const terminalAgents = new Set(caseStudyTerminalScript.map(item => item.agentId))
+        setTerminalLines(prev => [
+          ...prev,
+          ...caseStudyTerminalScript.map(item => ({
+            id: makeMsgId(),
+            agentId: item.agentId,
+            author: 'agent' as const,
+            text: item.text,
+            timestamp: timeNow(),
+          })),
+        ].slice(-220))
+        setTypingAgents(prev => new Set([...prev, ...terminalAgents]))
+        setTimeout(() => {
+          setTypingAgents(prev => {
+            const next = new Set(prev)
+            for (const id of terminalAgents) next.delete(id)
+            return next
+          })
+        }, 1100)
+        setCaseStudyOutputOpen(true)
+        addMsg('Portfolio Coach', 'station-ops-captain', AGENT_CONFIGS['station-ops-captain']?.color ?? '#d8d8d8', 'student portfolio package generated locally and ready to inspect')
+        void runCaseStudyArtifactJob()
+      } else if (templateId === RECOMMENDED_STUDENT_TEMPLATE_ID) {
+        setTerminalLines(prev => [
+          ...prev,
+          {
+            id: makeMsgId(),
+            agentId: 'quantum-coordinator',
+            author: 'agent' as const,
+            text: 'Project Finder is preparing a real audit from local workspace folders.',
+            timestamp: timeNow(),
+          },
+          {
+            id: makeMsgId(),
+            agentId: 'quantum-systems-engineer',
+            author: 'agent' as const,
+            text: 'GitHub Polish Agent will use the audit to decide which README and screenshots matter first.',
+            timestamp: timeNow(),
+          },
+        ].slice(-220))
+        void runProjectAuditJob()
+      }
     }, 0)
-  }, [addMsg])
+  }, [addMsg, runCaseStudyArtifactJob, runProjectAuditJob])
+
+  const handleTerminalSend = useCallback((target: TerminalTarget, text: string) => {
+    const trimmed = text.trim()
+    if (!trimmed) return
+
+    const recipients = target === 'broadcast'
+      ? allOpsAgents.slice(0, 9)
+      : allOpsAgents.filter(agent => agent.id === target)
+
+    if (recipients.length === 0) return
+
+    const lines: AgentTerminalLine[] = []
+    for (const agent of recipients) {
+      const task = getTaskForAgent(agent, missionTasks)
+      lines.push({
+        id: makeMsgId(),
+        agentId: agent.id,
+        author: 'user',
+        text: trimmed,
+        timestamp: timeNow(),
+      })
+      lines.push({
+        id: makeMsgId(),
+        agentId: agent.id,
+        author: 'agent',
+        text: agentTerminalReply(agent, trimmed, task),
+        timestamp: timeNow(),
+      })
+    }
+
+    setTerminalLines(prev => [...prev, ...lines].slice(-220))
+
+    const recipientIds = new Set(recipients.map(agent => agent.id))
+    setTypingAgents(prev => new Set([...prev, ...recipientIds]))
+    setTimeout(() => {
+      setTypingAgents(prev => {
+        const next = new Set(prev)
+        for (const id of recipientIds) next.delete(id)
+        return next
+      })
+    }, 900)
+
+    const bossCfg = AGENT_CONFIGS[BOSS_ROLE] ?? AGENT_CONFIGS.default
+    addMsg(
+      bossCfg.title,
+      BOSS_ROLE,
+      bossCfg.color,
+      target === 'broadcast'
+        ? `terminal broadcast: ${trimmed}`
+        : `terminal to ${recipients[0].name}: ${trimmed}`,
+    )
+  }, [addMsg, allOpsAgents, missionTasks])
 
   const handleRoomTransition = useCallback((toRoom: RoomId) => {
     if (toRoom === currentRoom) return
@@ -637,6 +950,8 @@ const App: React.FC = () => {
     setOpenRoomProp(null)
     setMissionQueueOpen(false)
     setWardMissionOpen(false)
+    setAgentTerminalsOpen(false)
+    setCaseStudyOutputOpen(false)
     if (!sfx.isMuted()) sfx.playDoorOpen()
 
     setTimeout(() => {
@@ -2208,11 +2523,9 @@ const App: React.FC = () => {
     return item
   })
   const activeConnections = currentRoomDef.connections.filter(conn => {
-    if (currentRoom === 'main-office') return conn.toRoom === 'station-command'
-    if (currentRoom === 'station-command') return conn.toRoom === 'main-office' || conn.toRoom === 'quantum-core' || conn.toRoom === 'orbital-greenhouse'
-    if (currentRoom === 'quantum-core') return conn.toRoom === 'station-command'
-    if (currentRoom === 'orbital-greenhouse') return conn.toRoom === 'station-command'
-    return true
+    if (currentRoom === 'main-office') return conn.toRoom === 'quantum-core'
+    if (currentRoom === 'quantum-core') return conn.toRoom === 'main-office'
+    return false
   })
   const visibleAgents = isStationRoom ? stationAgents : isQuantumRoom ? quantumAgents : isGreenhouseRoom ? greenhouseAgents : agents
   const activeRoomProps = ROOM_PROP_HOTSPOTS.filter(prop => prop.roomId === currentRoom)
@@ -2246,9 +2559,43 @@ const App: React.FC = () => {
             setSelectedAgentId(null)
             setOpenRoomProp(null)
             setMissionQueueOpen(false)
+            setAgentTerminalsOpen(false)
+            setCaseStudyOutputOpen(false)
           }}
         >
           CONTROL
+        </button>
+        <button
+          className="title-bar-control title-bar-terminal"
+          type="button"
+          title="Open multi-agent terminals"
+          aria-label="Open multi-agent terminals"
+          onClick={() => {
+            setAgentTerminalsOpen(true)
+            setWardMissionOpen(false)
+            setSelectedAgentId(null)
+            setOpenRoomProp(null)
+            setMissionQueueOpen(false)
+            setCaseStudyOutputOpen(false)
+          }}
+        >
+          TERMINALS
+        </button>
+        <button
+          className="title-bar-control"
+          type="button"
+          title="Open Case Study Package"
+          aria-label="Open Case Study Package"
+          onClick={() => {
+            setCaseStudyOutputOpen(true)
+            setWardMissionOpen(false)
+            setAgentTerminalsOpen(false)
+            setSelectedAgentId(null)
+            setOpenRoomProp(null)
+            setMissionQueueOpen(false)
+          }}
+        >
+          CASE
         </button>
         <button
           className="title-bar-daynight"
@@ -2324,6 +2671,8 @@ const App: React.FC = () => {
               onClick={() => {
                 setSelectedAgentId(null)
                 setWardMissionOpen(false)
+                setAgentTerminalsOpen(false)
+                setCaseStudyOutputOpen(false)
                 if (prop.kind === 'mission') {
                   setMissionQueueOpen(true)
                   setOpenRoomProp(null)
@@ -2370,6 +2719,8 @@ const App: React.FC = () => {
                   setMissionQueueOpen(false)
                   setOpenRoomProp(null)
                   setWardMissionOpen(false)
+                  setAgentTerminalsOpen(false)
+                  setCaseStudyOutputOpen(false)
                 }}
                 selected={selectedAgentId === agent.id}
                 opsStatus={opsStatus}
@@ -2461,7 +2812,30 @@ const App: React.FC = () => {
             <WardMissionControl
               tasks={missionTasks}
               onStartMission={handleStartPortfolioMission}
+              onOpenCaseStudy={() => {
+                setCaseStudyOutputOpen(true)
+                setWardMissionOpen(false)
+              }}
+              caseStudyReady={caseStudyReady || !!caseStudyArtifactResult}
               onClose={() => setWardMissionOpen(false)}
+            />
+          )}
+          {caseStudyOutputOpen && (
+            <CaseStudyOutput
+              artifactResult={caseStudyArtifactResult}
+              onClose={() => setCaseStudyOutputOpen(false)}
+            />
+          )}
+          {agentTerminalsOpen && (
+            <AgentTerminals
+              agents={allOpsAgents}
+              tasks={missionTasks}
+              currentRoom={currentRoom}
+              lines={terminalLines}
+              activeTarget={activeTerminalTarget}
+              onActiveTargetChange={setActiveTerminalTarget}
+              onSend={handleTerminalSend}
+              onClose={() => setAgentTerminalsOpen(false)}
             />
           )}
         </div>

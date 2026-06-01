@@ -1,45 +1,40 @@
 # Ward Agent Studio
 
-Ward Agent Studio is a visual AI agent command center for building portfolio projects, organizing ideas, tracking learning, saving prompts, and preparing career materials.
+Ward Agent Studio is a visual student portfolio and career lab for choosing better projects, tracking learning, polishing GitHub repos, saving prompts, creating CV bullets, and preparing internship material.
 
 It started from the Claude-Office concept and is being shaped into a portfolio-ready personal workspace for Ward: an isometric multi-room app where AI agents have visible roles, missions, progress, room-based behavior, and clickable status panels.
 
 ## What It Does
 
-- Shows a multi-room isometric agent workspace.
+- Shows a focused isometric agent workspace.
 - Keeps the Main Office as the starting room.
-- Adds connected space-station rooms:
-  - Station Command Deck
-  - Quantum Core Lab
-  - Orbital Greenhouse Bay
+- Connects the Main Office directly to the Quantum Core Lab.
 - Provides Ward Mission Control, a compact portfolio dashboard.
-- Tracks active missions, project ideas, learning notes, prompt templates, job prep, and build activity.
-- Lets the user start demo portfolio missions from templates.
+- Tracks active missions, project ideas, learning notes, prompt templates, CV/internship prep, and build activity.
+- Lets the user start focused portfolio missions from simple templates.
+- Runs a real local Project Audit that scans Ward's project folders and ranks what is worth polishing first.
 - Shows agent status, progress, current task, last action, elapsed time, and output notes.
-- Keeps the current implementation local-first with simulated agent work, ready for real automation later.
+- Writes reusable markdown artifacts for portfolio planning and case-study work.
 
 ## Product Idea
 
 Ward Agent Studio is meant to answer a practical problem:
 
-> "I am not working right now, but I want my AI agents to help me build a portfolio, learn consistently, organize prompts, and prepare for job opportunities."
+> "I am a semester-4 student and I want my AI agents to help me choose worthwhile projects, build portfolio proof, learn consistently, polish GitHub, and prepare for internships."
 
 Instead of a plain todo app, the project turns that workflow into a visual command center. Rooms have purpose:
 
-- Main Office: planning, daily next steps, job/career notes
-- Station Command Deck: mission queue, portfolio strategy, coordination
-- Quantum Core Lab: building, testing, debugging
-- Orbital Greenhouse Bay: ideas, learning, research incubation
+- Main Office: project choices, daily next steps, CV notes, and internship prep
+- Quantum Core Lab: repo polish, proof screenshots, artifact output, and build/test notes
 
 ## Agent Roles
 
-- Coordinator: chooses priorities and breaks goals into small missions.
-- Researcher: studies references, docs, job targets, and project ideas.
-- Builder: implements app/project features.
-- Tester: runs build checks, UI flows, and screenshots.
-- Archivist: writes README notes, changelogs, and learning summaries.
-- Career Agent: tracks CV notes, interview prep, and application next steps.
-- Portfolio Curator: turns projects into GitHub-ready showcase material.
+- Portfolio Coach: turns Ward's projects into portfolio stories, case studies, screenshots, and GitHub-ready proof.
+- Project Finder: scans current ideas/projects and chooses what is actually worth finishing.
+- Skill Mentor: turns semester-4 learning goals into weekly practice plans, notes, and proof tasks.
+- GitHub Polish Agent: cleans READMEs, repo descriptions, screenshots, setup steps, and roadmaps.
+- CV Agent: converts projects and coursework into CV bullets, LinkedIn copy, and interview stories.
+- Internship Scout: maps internship targets to skill gaps, application checklists, and next actions.
 
 ## Ward Mission Control
 
@@ -50,20 +45,20 @@ The dashboard includes:
 - Project Ideas
 - Learning Roadmap
 - Prompt Library
-- Job Hunt Tracker
+- Internship / Career Tracker
 - Build Log / Agent Activity
 - Today's Next Steps
 
 Mission templates include:
 
-- Build a portfolio project from an idea
-- Improve this Ward Agent Studio app
-- Learn one skill this week
-- Prepare GitHub README for a project
-- Create job application pack
-- Research 5 project ideas
-- Polish screenshots and demo flow
-- Write a project case study
+- Turn My Current Projects Into a Portfolio Plan
+- Build One Portfolio Case Study
+- Create CV Bullets From Projects
+
+The main recommended mission is **Turn My Current Projects Into a Portfolio Plan**. It scans local project folders and writes:
+
+- `docs/portfolio-audit/ward-project-audit.md`
+- `docs/portfolio-audit/project-audit.json`
 
 ## Screenshots
 
@@ -71,17 +66,9 @@ Mission templates include:
 
 ![Ward Mission Control](docs/screenshots/mission-control.png)
 
-### Station Command Deck Mission Queue
-
-![Station Mission Queue](docs/screenshots/station-mission-queue.png)
-
 ### Quantum Core Lab Build Logs
 
 ![Quantum Build Log](docs/screenshots/quantum-build-log.png)
-
-### Orbital Greenhouse Ideas And Learning
-
-![Greenhouse Ideas Learning](docs/screenshots/greenhouse-ideas-learning.png)
 
 ## Tech Stack
 
@@ -104,7 +91,7 @@ npm install
 Start the app and local server:
 
 ```bash
-npm run dev
+npm run dev:all
 ```
 
 Open:
@@ -121,16 +108,15 @@ npm run build
 
 ## Current Status
 
-The app currently uses local demo mission data and simulated progress updates. Agents move between safe room waypoints and show useful work status, but they do not yet perform real file edits or backend jobs by themselves.
+The app now combines simulated visual agent progress with real local artifact writers. The Project Audit mission scans local project folders and writes a ranked portfolio plan. The Case Study mission writes reusable markdown files for README, portfolio, CV, and internship material.
 
 ## Roadmap
 
 - Save mission/project data locally.
-- Connect Start Mission to real workspace tasks.
 - Let agents write structured markdown logs.
 - Add GitHub-ready screenshot export flow.
 - Add real build/test command execution logs.
-- Add job application tracking persistence.
+- Add CV and internship tracking persistence.
 - Prepare a clean public GitHub repo as `ward-agent-studio`.
 
 ## Portfolio Notes

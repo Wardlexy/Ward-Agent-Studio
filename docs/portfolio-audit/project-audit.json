@@ -1,0 +1,206 @@
+{
+  "generatedAt": "2026-06-01T08:06:15.143Z",
+  "roots": [
+    "C:\\Users\\lexdw\\Projects",
+    "C:\\Users\\lexdw\\OneDrive\\Documents\\Portfolio",
+    "C:\\Users\\lexdw\\Claude-Office"
+  ],
+  "projects": [
+    {
+      "name": "ward-agent-studio",
+      "path": "Ward Agent Studio workspace",
+      "relativePath": "Ward Agent Studio workspace",
+      "score": 98,
+      "effort": "low",
+      "tech": [
+        "JavaScript/TypeScript",
+        "React",
+        "Vite",
+        "Express",
+        "Electron",
+        "SQLite",
+        "Python",
+        "TypeScript",
+        "Web UI"
+      ],
+      "codeFileCount": 62,
+      "hasReadme": true,
+      "hasScreenshots": true,
+      "modifiedAt": "2026-06-01T07:56:24.831Z",
+      "nextAction": "Turn this into a case study with problem, solution, demo flow, and CV bullets.",
+      "cvAngle": "Shows JavaScript/TypeScript, React, Vite, Express, Electron, SQLite, Python, TypeScript, Web UI work through a real project that can be explained with screenshots, setup steps, and a short demo.",
+      "missing": []
+    },
+    {
+      "name": "ward-agent-studio",
+      "path": "~/OneDrive/Documents/Portfolio/Space Office",
+      "relativePath": "~/OneDrive/Documents/Portfolio/Space Office",
+      "score": 90,
+      "effort": "medium",
+      "tech": [
+        "JavaScript/TypeScript",
+        "React",
+        "Vite",
+        "Express",
+        "Electron",
+        "SQLite",
+        "Python",
+        "TypeScript",
+        "Web UI"
+      ],
+      "codeFileCount": 53,
+      "hasReadme": true,
+      "hasScreenshots": true,
+      "modifiedAt": "2026-05-28T12:28:17.158Z",
+      "nextAction": "Turn this into a case study with problem, solution, demo flow, and CV bullets.",
+      "cvAngle": "Shows JavaScript/TypeScript, React, Vite, Express, Electron, SQLite, Python, TypeScript, Web UI work through a real project that can be explained with screenshots, setup steps, and a short demo.",
+      "missing": [
+        "Git history"
+      ]
+    },
+    {
+      "name": "agents",
+      "path": "~/Projects/agents",
+      "relativePath": "~/Projects/agents",
+      "score": 82,
+      "effort": "low",
+      "tech": [
+        "Python",
+        "Notebook"
+      ],
+      "codeFileCount": 892,
+      "hasReadme": true,
+      "hasScreenshots": true,
+      "modifiedAt": "2026-05-28T18:27:13.864Z",
+      "nextAction": "Turn this into a case study with problem, solution, demo flow, and CV bullets.",
+      "cvAngle": "Shows Python, Notebook work through a real project that can be explained with screenshots, setup steps, and a short demo.",
+      "missing": []
+    },
+    {
+      "name": "1_foundations",
+      "path": "~/Projects/agents/1_foundations",
+      "relativePath": "~/Projects/agents/1_foundations",
+      "score": 61,
+      "effort": "medium",
+      "tech": [
+        "Python",
+        "Web UI"
+      ],
+      "codeFileCount": 900,
+      "hasReadme": true,
+      "hasScreenshots": false,
+      "modifiedAt": "2026-05-14T10:02:42.902Z",
+      "nextAction": "Capture 2-3 screenshots and add them to the README.",
+      "cvAngle": "Shows Python, Web UI work through a real project that can be explained with screenshots, setup steps, and a short demo.",
+      "missing": [
+        "screenshots",
+        "Git history"
+      ]
+    },
+    {
+      "name": "🤖 JobAgent",
+      "path": "~/OneDrive/Documents/Portfolio/Job Agent",
+      "relativePath": "~/OneDrive/Documents/Portfolio/Job Agent",
+      "score": 57,
+      "effort": "medium",
+      "tech": [
+        "Python",
+        "Web UI"
+      ],
+      "codeFileCount": 3,
+      "hasReadme": true,
+      "hasScreenshots": false,
+      "modifiedAt": "2026-04-24T06:26:38.652Z",
+      "nextAction": "Capture 2-3 screenshots and add them to the README.",
+      "cvAngle": "Shows Python, Web UI work through a real project that can be explained with screenshots, setup steps, and a short demo.",
+      "missing": [
+        "screenshots"
+      ]
+    },
+    {
+      "name": "🏥 MediRoute",
+      "path": "~/OneDrive/Documents/Portfolio/Medi Route",
+      "relativePath": "~/OneDrive/Documents/Portfolio/Medi Route",
+      "score": 45,
+      "effort": "medium",
+      "tech": [
+        "Python",
+        "Web UI"
+      ],
+      "codeFileCount": 4,
+      "hasReadme": true,
+      "hasScreenshots": false,
+      "modifiedAt": "2026-04-24T06:28:58.686Z",
+      "nextAction": "Capture 2-3 screenshots and add them to the README.",
+      "cvAngle": "Shows Python, Web UI work through a real project that can be explained with screenshots, setup steps, and a short demo.",
+      "missing": [
+        "screenshots",
+        "run instructions"
+      ]
+    },
+    {
+      "name": "MCP RAG Travel Agent",
+      "path": "~/OneDrive/Documents/Portfolio/Travel Agent",
+      "relativePath": "~/OneDrive/Documents/Portfolio/Travel Agent",
+      "score": 45,
+      "effort": "medium",
+      "tech": [
+        "Web UI"
+      ],
+      "codeFileCount": 7,
+      "hasReadme": true,
+      "hasScreenshots": false,
+      "modifiedAt": "2026-05-19T16:11:15.099Z",
+      "nextAction": "Capture 2-3 screenshots and add them to the README.",
+      "cvAngle": "Shows Web UI work through a real project that can be explained with screenshots, setup steps, and a short demo.",
+      "missing": [
+        "screenshots",
+        "run instructions"
+      ]
+    },
+    {
+      "name": "Beelingua Agent",
+      "path": "~/OneDrive/Documents/Portfolio/Beelingua Agent",
+      "relativePath": "~/OneDrive/Documents/Portfolio/Beelingua Agent",
+      "score": 35,
+      "effort": "high",
+      "tech": [
+        "Python",
+        "Web UI"
+      ],
+      "codeFileCount": 11,
+      "hasReadme": false,
+      "hasScreenshots": false,
+      "modifiedAt": "2026-04-24T06:27:00.394Z",
+      "nextAction": "Write a README with pitch, setup, features, screenshots, and roadmap.",
+      "cvAngle": "Shows Python, Web UI work through a real project that can be explained with screenshots, setup steps, and a short demo.",
+      "missing": [
+        "README",
+        "screenshots",
+        "run instructions"
+      ]
+    },
+    {
+      "name": "Data Pipeline Monitor",
+      "path": "~/OneDrive/Documents/Portfolio/Data Pipeline Monitor",
+      "relativePath": "~/OneDrive/Documents/Portfolio/Data Pipeline Monitor",
+      "score": 35,
+      "effort": "high",
+      "tech": [
+        "Python",
+        "Web UI"
+      ],
+      "codeFileCount": 4,
+      "hasReadme": false,
+      "hasScreenshots": false,
+      "modifiedAt": "2026-04-24T06:29:53.880Z",
+      "nextAction": "Write a README with pitch, setup, features, screenshots, and roadmap.",
+      "cvAngle": "Shows Python, Web UI work through a real project that can be explained with screenshots, setup steps, and a short demo.",
+      "missing": [
+        "README",
+        "screenshots",
+        "Git history"
+      ]
+    }
+  ]
+}

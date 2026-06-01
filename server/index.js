@@ -19,9 +19,12 @@ import { fileURLToPath } from 'url'
 import { dirname } from 'path'
 import { addMessage, getMessages, markSeen, addReaction } from './chat-db.js'
 import db from './chat-db.js'
+import { writeWardCaseStudyArtifacts } from './portfolio-artifacts.js'
+import { writeWardProjectAudit } from './project-audit.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+const PROJECT_ROOT = join(__dirname, '..')
 const NOTIFY_SCRIPT = join(__dirname, '..', 'scripts', 'notify.sh')
 
 function sendNotification(title, msg) {
@@ -167,6 +170,41 @@ app.options('*', (_req, res) => res.sendStatus(204))
 // Health check
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', agents: activeAgents.size, clients: wss?.clients.size ?? 0 })
+})
+
+app.post('/portfolio/case-study', (_req, res) => {
+  try {
+    const result = writeWardCaseStudyArtifacts(PROJECT_ROOT)
+    const msg = addMessage({
+      sender: 'Archivist',
+      role: 'assistant',
+      text: `wrote portfolio artifacts: ${result.artifacts.map(item => item.path).join(', ')}`,
+    })
+    broadcast({ type: 'chat_message', ...msg })
+    res.json({ ok: true, ...result })
+  } catch (err) {
+    console.error('[portfolio] case study artifact failed:', err)
+    res.status(500).json({ error: err.message ?? 'Failed to write case study artifacts' })
+  }
+})
+
+app.post('/portfolio/project-audit', (_req, res) => {
+  try {
+    const result = writeWardProjectAudit(PROJECT_ROOT)
+    const top = result.topProjects?.[0]
+    const msg = addMessage({
+      sender: 'Project Finder',
+      role: 'station-coordinator',
+      text: top
+        ? `project audit complete: polish ${top.name} first (${top.score}/100)`
+        : 'project audit complete: no local projects found yet',
+    })
+    broadcast({ type: 'chat_message', ...msg })
+    res.json({ ok: true, ...result })
+  } catch (err) {
+    console.error('[portfolio] project audit failed:', err)
+    res.status(500).json({ error: err.message ?? 'Failed to write project audit' })
+  }
 })
 
 // MCP server roster

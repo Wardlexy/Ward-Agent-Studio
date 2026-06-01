@@ -108,31 +108,27 @@ export const wardMissionSections: WardMissionSection[] = [
 
 export const wardAgentBrief = [
   {
-    role: 'Coordinator',
-    output: 'Chooses priorities and breaks portfolio goals into small missions.',
+    role: 'Portfolio Coach',
+    output: 'Turns Ward’s projects into portfolio stories, case studies, screenshots, and GitHub-ready proof.',
   },
   {
-    role: 'Researcher',
-    output: 'Studies references, docs, job targets, and project ideas before Ward builds.',
+    role: 'Project Finder',
+    output: 'Looks at Ward’s current folders and picks the projects most worth finishing first.',
   },
   {
-    role: 'Builder',
-    output: 'Implements app features and keeps the first usable version small.',
+    role: 'Skill Mentor',
+    output: 'Turns semester-4 learning goals into weekly practice plans, notes, and proof-of-progress tasks.',
   },
   {
-    role: 'Tester',
-    output: 'Runs build checks, clicks the app flow, and captures proof screenshots.',
+    role: 'GitHub Polish Agent',
+    output: 'Cleans project READMEs, repo descriptions, screenshots, setup steps, and roadmap sections.',
   },
   {
-    role: 'Archivist',
-    output: 'Writes README notes, changelog summaries, and learning logs.',
+    role: 'CV Agent',
+    output: 'Converts projects and coursework into CV bullets, LinkedIn copy, and interview stories.',
   },
   {
-    role: 'Career Agent',
-    output: 'Tracks job prep, CV bullets, interview notes, and application next steps.',
-  },
-  {
-    role: 'Portfolio Curator',
-    output: 'Turns projects into showcase material: screenshots, case studies, and GitHub polish.',
+    role: 'Internship Scout',
+    output: 'Maps target internships to skill gaps, application checklists, and next actions Ward can do this week.',
   },
 ]

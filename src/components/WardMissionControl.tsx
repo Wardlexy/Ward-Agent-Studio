@@ -1,23 +1,25 @@
 import React from 'react'
 import type { MissionTask } from '../ops/types'
 import { statusLabel } from '../ops/agentOps'
-import { wardAgentBrief } from '../ops/wardMission'
-import { portfolioDashboardData } from '../portfolio/demoData'
-import { portfolioMissionTemplates } from '../portfolio/missionTemplates'
-import { MissionTemplateCard, PortfolioMissionCard } from './PortfolioMissionCard'
-import LearningRoadmap from './LearningRoadmap'
-import PromptLibrary from './PromptLibrary'
-import JobHuntTracker from './JobHuntTracker'
+import { portfolioMissionTemplates, RECOMMENDED_STUDENT_TEMPLATE_ID } from '../portfolio/missionTemplates'
 
 interface WardMissionControlProps {
   tasks: MissionTask[]
   onStartMission: (templateId: string) => void
+  onOpenCaseStudy: () => void
+  caseStudyReady: boolean
   onClose: () => void
 }
 
-const WardMissionControl: React.FC<WardMissionControlProps> = ({ tasks, onStartMission, onClose }) => {
+const WardMissionControl: React.FC<WardMissionControlProps> = ({
+  tasks,
+  onStartMission,
+  onOpenCaseStudy,
+  caseStudyReady,
+  onClose,
+}) => {
   const activeTasks = tasks.filter(task => task.status !== 'done')
-  const topTasks = activeTasks.slice(0, 4)
+  const topTasks = activeTasks.slice(0, 2)
   const averageProgress = tasks.length
     ? Math.round(tasks.reduce((sum, task) => sum + task.progress, 0) / tasks.length)
     : 0
@@ -26,6 +28,14 @@ const WardMissionControl: React.FC<WardMissionControlProps> = ({ tasks, onStartM
       .map(task => portfolioMissionTemplates.find(template => task.id.includes(template.id))?.id)
       .filter(Boolean) as string[],
   )
+  const simpleTemplates = [
+    RECOMMENDED_STUDENT_TEMPLATE_ID,
+    'template-build-case-study',
+    'template-cv-project-bullets',
+  ]
+    .map(id => portfolioMissionTemplates.find(template => template.id === id))
+    .filter(Boolean) as typeof portfolioMissionTemplates
+  const recommendedTemplate = simpleTemplates[0]
 
   return (
     <section className="ops-panel ward-mission-control" aria-label="Ward Mission Control">
@@ -33,145 +43,140 @@ const WardMissionControl: React.FC<WardMissionControlProps> = ({ tasks, onStartM
         <div>
           <div className="ops-kicker">Ward Agent Studio</div>
           <h2>Ward Mission Control</h2>
-          <p className="ward-product-line">Visual AI agent workspace for building projects, learning, prompts, and career prep.</p>
+          <p className="ward-product-line">Student portfolio and career lab for turning Ward’s projects, learning, and internship prep into proof-of-work.</p>
         </div>
-        <button className="ops-close" type="button" onClick={onClose} aria-label="Close Ward Mission Control">x</button>
+        <div className="ward-header-actions">
+          <button
+            className="ward-output-button"
+            type="button"
+            onClick={onOpenCaseStudy}
+            aria-label="Open Portfolio Output Package"
+          >
+            {caseStudyReady ? 'Output Package' : 'Preview Package'}
+          </button>
+          <button className="ops-close" type="button" onClick={onClose} aria-label="Close Ward Mission Control">x</button>
+        </div>
       </header>
 
       <div className="ward-mission-summary">
         <div>
-          <span>Active Missions</span>
+          <span>Running Now</span>
           <strong>{activeTasks.length}</strong>
         </div>
         <div>
-          <span>Avg Progress</span>
+          <span>Package Progress</span>
           <strong>{averageProgress}%</strong>
         </div>
         <div>
-          <span>Studio Mode</span>
-          <strong>Portfolio</strong>
+          <span>Main Use</span>
+          <strong>Student Portfolio</strong>
         </div>
       </div>
 
       <div className="ward-mission-scroll">
-        <section className="ward-section active-missions-section">
-          <div className="ward-section-heading">
-            <span>Live Ops</span>
-            <h3>Active Portfolio Missions</h3>
-          </div>
-          <div className="ward-active-list">
-            {topTasks.map(task => (
-              <article key={task.id} className={`ward-active-card status-${task.status}`}>
-                <div className="ops-task-topline">
-                  <strong>{task.title}</strong>
-                  <span>{task.progress}%</span>
-                </div>
-                <p>{task.lastAction}</p>
-                <div className="ops-task-meta">
-                  <span>{task.currentRoom.replace('-', ' ')}</span>
-                  <span>{statusLabel(task.status)}</span>
-                </div>
-                <div className="ops-progress-track small">
-                  <div className={`ops-progress-fill status-${task.status}`} style={{ width: `${task.progress}%` }} />
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="ward-section">
+        <section className="ward-section ward-mission-guide ward-simple-hero">
           <div className="ward-section-heading">
             <span>Start Here</span>
-            <h3>Mission Templates</h3>
+            <h3>Pick one useful output</h3>
           </div>
-          <div className="ward-template-grid">
-            {portfolioMissionTemplates.map(template => (
-              <MissionTemplateCard
-                key={template.id}
-                template={template}
-                isRunning={activeTemplateIds.has(template.id)}
-                onStart={onStartMission}
-              />
-            ))}
+          <p className="ward-section-note">
+            If you are not sure what to do, start here. The agents will help choose which project is most worth polishing for your CV, GitHub, and portfolio.
+          </p>
+          {recommendedTemplate && (
+            <button
+              className="ward-primary-mission-button"
+              type="button"
+              disabled={activeTemplateIds.has(recommendedTemplate.id)}
+              onClick={() => onStartMission(recommendedTemplate.id)}
+            >
+              {activeTemplateIds.has(recommendedTemplate.id) ? 'Project Audit Running' : 'Start Project Audit'}
+            </button>
+          )}
+          <div className="ward-simple-steps">
+            <span>1. Agents pick the best project</span>
+            <span>2. Agents write the next step</span>
+            <span>3. Output becomes CV / GitHub material</span>
+          </div>
+        </section>
+
+        <section className="ward-section active-missions-section">
+          <div className="ward-section-heading">
+            <span>Now Working</span>
+            <h3>Mission Progress</h3>
+          </div>
+          <div className="ward-active-list">
+            {topTasks.length ? (
+              topTasks.map(task => (
+                <article key={task.id} className={`ward-active-card status-${task.status}`}>
+                  <div className="ops-task-topline">
+                    <strong>{task.title}</strong>
+                    <span>{task.progress}%</span>
+                  </div>
+                  <p>{task.lastAction}</p>
+                  <div className="ops-task-meta">
+                    <span>{task.currentRoom.replace('-', ' ')}</span>
+                    <span>{statusLabel(task.status)}</span>
+                  </div>
+                  <div className="ops-progress-track small">
+                    <div className={`ops-progress-fill status-${task.status}`} style={{ width: `${task.progress}%` }} />
+                  </div>
+                </article>
+              ))
+            ) : (
+              <article className="ward-active-card ward-empty-mission-card">
+                <strong>No mission running yet</strong>
+                <p>Start with Project Audit first. It is the clearest first step because it tells you which project to polish before doing anything else.</p>
+                <button
+                  className="ward-start-button"
+                  type="button"
+                  onClick={() => onStartMission(RECOMMENDED_STUDENT_TEMPLATE_ID)}
+                >
+                  Start Project Audit
+                </button>
+              </article>
+            )}
           </div>
         </section>
 
         <section className="ward-section">
           <div className="ward-section-heading">
-            <span>Agent Squad</span>
-            <h3>Who Does What</h3>
+            <span>Simple Choices</span>
+            <h3>3 Useful Missions</h3>
           </div>
-          <div className="ward-brief-grid">
-            {wardAgentBrief.map(item => (
-              <article key={item.role} className="ward-brief-card">
-                <strong>{item.role}</strong>
-                <p>{item.output}</p>
+          <div className="ward-simple-mission-grid">
+            {simpleTemplates.map(template => (
+              <article key={template.id} className={`ward-template-card priority-${template.priority}`}>
+                <div className="ward-template-title">
+                  <strong>{template.title}</strong>
+                  <span>{template.priority}</span>
+                </div>
+                <p>{template.description}</p>
+                <div className="ward-template-output">
+                  <span>Result</span>
+                  <strong>{template.expectedOutput}</strong>
+                </div>
+                <button
+                  className="ward-start-button"
+                  type="button"
+                  disabled={activeTemplateIds.has(template.id)}
+                  onClick={() => onStartMission(template.id)}
+                >
+                  {activeTemplateIds.has(template.id) ? 'Running' : 'Start'}
+                </button>
               </article>
             ))}
           </div>
         </section>
 
-        <div className="ward-section-grid">
-          <section className="ward-section">
-            <div className="ward-section-heading">
-              <span>Incubator</span>
-              <h3>Project Ideas</h3>
-            </div>
-            <div className="ward-item-list">
-              {portfolioDashboardData.projectIdeas.map(item => (
-                <PortfolioMissionCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-
-          <section className="ward-section">
-            <div className="ward-section-heading">
-              <span>Skill Log</span>
-              <h3>Learning Roadmap</h3>
-            </div>
-            <LearningRoadmap items={portfolioDashboardData.learningRoadmap} />
-          </section>
-
-          <section className="ward-section">
-            <div className="ward-section-heading">
-              <span>Reusable</span>
-              <h3>Prompt Library</h3>
-            </div>
-            <PromptLibrary items={portfolioDashboardData.promptLibrary} />
-          </section>
-
-          <section className="ward-section">
-            <div className="ward-section-heading">
-              <span>Career Prep</span>
-              <h3>Job Hunt Tracker</h3>
-            </div>
-            <JobHuntTracker items={portfolioDashboardData.jobHuntTracker} />
-          </section>
-
-          <section className="ward-section">
-            <div className="ward-section-heading">
-              <span>Build Notes</span>
-              <h3>Build Log / Agent Activity</h3>
-            </div>
-            <div className="ward-item-list">
-              {portfolioDashboardData.buildLog.map(item => (
-                <PortfolioMissionCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-
-          <section className="ward-section">
-            <div className="ward-section-heading">
-              <span>Do Now</span>
-              <h3>Today's Next Steps</h3>
-            </div>
-            <div className="ward-item-list">
-              {portfolioDashboardData.todayNextSteps.map(item => (
-                <PortfolioMissionCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-        </div>
+        <section className="ward-section ward-simple-help">
+          <div className="ward-section-heading">
+            <span>Meaning</span>
+            <h3>What you get</h3>
+          </div>
+          <p><strong>Project Audit</strong> = choose the project that is most worth finishing.</p>
+          <p><strong>Case Study</strong> = turn one project into a portfolio story.</p>
+          <p><strong>CV Bullets</strong> = turn your project work into CV and internship lines.</p>
+        </section>
       </div>
     </section>
   )

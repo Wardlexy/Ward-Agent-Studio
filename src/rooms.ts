@@ -122,7 +122,7 @@ export const ROOMS: Record<RoomId, Room> = {
       { id: 'tv-monitor', type: 'hotspot', sprite: 'hotspot', x: 90, y: 42, interactive: true, label: 'Dashboard' },
     ],
     connections: [
-      { toRoom: 'station-command', position: { x: 67.5, y: 48.9 }, label: 'Enter Command Deck', exitFacing: 'rear-right', entryFacing: 'front-right' },
+      { toRoom: 'quantum-core', position: { x: 67.5, y: 48.9 }, label: 'Enter Quantum Core Lab', exitFacing: 'rear-right', entryFacing: 'front-right' },
       { toRoom: 'manager-office', position: { x: 67.5, y: 48.9 }, label: "Manager's Office", exitFacing: 'rear-right', entryFacing: 'front-right' },
     ],
     agentSpots: [
@@ -314,7 +314,7 @@ export const ROOMS: Record<RoomId, Room> = {
     height: 600,
     furniture: [],
     connections: [
-      { toRoom: 'station-command', position: { x: 50.0, y: 85.0 }, label: 'Return to Command Deck', exitFacing: 'front-right', entryFacing: 'front-left' },
+      { toRoom: 'main-office', position: { x: 50.0, y: 85.0 }, label: 'Return to Main Office', exitFacing: 'front-right', entryFacing: 'front-left' },
     ],
     agentSpots: [
       { id: 'quantum-entry', type: 'door', x: 50.0, y: 85.0, facing: 'down', spriteFacing: 'front-right', zIndex: 92 },

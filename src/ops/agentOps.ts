@@ -49,7 +49,12 @@ export function advanceMissions(
       progress = Math.min(66, progress + dtMs / 10_000)
     } else {
       if (status === 'blocked') status = 'testing'
-      const rate = status === 'coding' || status === 'testing' ? 0.9 : 0.65
+      const isCaseStudyMission = task.id.includes('template-build-case-study')
+      const rate = isCaseStudyMission
+        ? 4.2
+        : status === 'coding' || status === 'testing'
+          ? 0.9
+          : 0.65
       progress = Math.min(100, progress + (dtMs / 1000) * rate)
 
       if (progress >= 72 && status === 'planning') status = 'researching'
@@ -116,7 +121,7 @@ export function filterTasksForPanel(kind: RoomPropKind, tasks: MissionTask[]): M
   }
   if (kind === 'ideas') {
     return tasks.filter(task =>
-      task.currentRoom === 'orbital-greenhouse' ||
+      task.currentRoom === 'main-office' ||
       task.status === 'researching' ||
       task.status === 'planning'
     )

@@ -68,6 +68,37 @@ export interface PortfolioMissionTemplate {
   expectedOutput: string
 }
 
+export interface PortfolioCaseStudyPackage {
+  projectTitle: string
+  pitch: string
+  problem: string
+  solution: string
+  keyFeatures: string[]
+  techStack: string[]
+  screenshotsChecklist: string[]
+  demoFlow: string[]
+  readmeDraft: string[]
+  portfolioCardCopy: {
+    title: string
+    description: string
+    tags: string[]
+  }
+  recruiterBullets: string[]
+  roadmap: string[]
+}
+
+export interface GeneratedArtifact {
+  path: string
+  label: string
+  description: string
+}
+
+export interface PortfolioArtifactResult {
+  generatedAt: string
+  summary: string
+  artifacts: GeneratedArtifact[]
+}
+
 export interface PortfolioDashboardData {
   projectIdeas: PortfolioItem[]
   learningRoadmap: LearningNote[]

@@ -16,7 +16,7 @@ const PANEL_COPY: Record<RoomPropKind, { kicker: string; title: string; empty: s
     empty: 'No active tasks yet',
   },
   mission: {
-    kicker: 'Command Deck',
+    kicker: 'Mission Control',
     title: 'Mission Queue',
     empty: 'No missions on deck',
   },
@@ -26,7 +26,7 @@ const PANEL_COPY: Record<RoomPropKind, { kicker: string; title: string; empty: s
     empty: 'No build or test work running',
   },
   ideas: {
-    kicker: 'Greenhouse Bay',
+    kicker: 'Idea Backlog',
     title: 'Ideas / Research Backlog',
     empty: 'No ideas growing yet',
   },

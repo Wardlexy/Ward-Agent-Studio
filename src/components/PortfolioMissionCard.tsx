@@ -31,7 +31,16 @@ export const MissionTemplateCard: React.FC<MissionTemplateCardProps> = ({ templa
       <strong>{template.title}</strong>
       <span>{template.priority}</span>
     </div>
-    <p>{template.goal}</p>
+    <p>{template.description}</p>
+    <div className="ward-template-output">
+      <span>You get</span>
+      <strong>{template.expectedOutput}</strong>
+    </div>
+    <div className="ward-template-checklist">
+      {template.checklist.slice(0, 3).map(item => (
+        <span key={item}>{item}</span>
+      ))}
+    </div>
     <div className="ward-template-agents">{template.suggestedAgents.slice(0, 4).join(' + ')}</div>
     <button
       className="ward-start-button"
@@ -39,7 +48,7 @@ export const MissionTemplateCard: React.FC<MissionTemplateCardProps> = ({ templa
       onClick={() => onStart(template.id)}
       disabled={isRunning}
     >
-      {isRunning ? 'Running' : 'Start Mission'}
+      {isRunning ? 'Agents Running' : 'Start Agents'}
     </button>
   </article>
 )

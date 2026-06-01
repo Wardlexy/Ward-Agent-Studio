@@ -134,7 +134,7 @@ export function getSpriteDir(): string {
 
 /** Kept signature-compatible for existing callers — agentId ignored; role is the key. */
 export function getSpritePath(_agentId: string, role: string, defaultBase: string, direction: string): string {
-  if (role.startsWith('station-')) {
+  if (role === 'boss' || role.startsWith('station-')) {
     return `/sprites/characters/${defaultBase}-${direction}.png`
   }
   const base = getCharacterBaseForRole(role, defaultBase)

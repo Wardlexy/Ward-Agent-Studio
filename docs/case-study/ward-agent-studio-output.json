@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-05-29T18:13:25.307Z",
+  "summary": "Case study mission wrote real markdown artifacts into docs/case-study.",
+  "artifacts": [
+    {
+      "path": "docs/case-study/ward-agent-studio-case-study.md",
+      "label": "Full Case Study",
+      "description": "Problem, solution, features, stack, demo flow, recruiter bullets, and roadmap."
+    },
+    {
+      "path": "docs/case-study/ward-agent-studio-readme-section.md",
+      "label": "README Section Draft",
+      "description": "GitHub-ready summary text Ward can paste into the main README."
+    },
+    {
+      "path": "docs/case-study/ward-agent-studio-recruiter-notes.md",
+      "label": "Recruiter Notes",
+      "description": "Short portfolio card copy and recruiter-friendly bullets."
+    }
+  ]
+}
