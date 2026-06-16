@@ -123,7 +123,6 @@ export const ROOMS: Record<RoomId, Room> = {
     ],
     connections: [
       { toRoom: 'quantum-core', position: { x: 67.5, y: 48.9 }, label: 'Enter Quantum Core Lab', exitFacing: 'rear-right', entryFacing: 'front-right' },
-      { toRoom: 'manager-office', position: { x: 67.5, y: 48.9 }, label: "Manager's Office", exitFacing: 'rear-right', entryFacing: 'front-right' },
     ],
     agentSpots: [
       // Desk spots are placed on nearby floor tiles, not on the tabletop sprites.

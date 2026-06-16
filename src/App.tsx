@@ -101,6 +101,10 @@ const ENTRY = MAIN_ROOM.entryPoint           // door position (%)
 const COFFEE_SPOT = MAIN_ROOM.agentSpots.find(s => s.type === 'coffee') ?? null
 const WATER_SPOTS  = MAIN_ROOM.agentSpots.filter(s => s.type === 'water')
 
+function isActiveRoom(roomId: RoomId): boolean {
+  return roomId === 'main-office' || roomId === 'quantum-core'
+}
+
 // Agent that is walking toward door to leave has this as targetPosition
 const DOOR_TARGET = { x: ENTRY.x, y: ENTRY.y }
 
@@ -443,9 +447,9 @@ const App: React.FC = () => {
   const [currentRoom, setCurrentRoom] = useState<RoomId>('main-office')
   const [roomTransitioning, setRoomTransitioning] = useState(false)
   const [agents, setAgents] = useState<Agent[]>(() => [createBoss(), createCodex()])
-  const [stationAgents, setStationAgents] = useState<Agent[]>(() => createStationCrew())
+  const [stationAgents, setStationAgents] = useState<Agent[]>([])
   const [quantumAgents, setQuantumAgents] = useState<Agent[]>(() => createQuantumCrew())
-  const [greenhouseAgents, setGreenhouseAgents] = useState<Agent[]>(() => createGreenhouseCrew())
+  const [greenhouseAgents, setGreenhouseAgents] = useState<Agent[]>([])
   const [missionTasks, setMissionTasks] = useState(() => createDemoMissions())
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null)
   const [openRoomProp, setOpenRoomProp] = useState<RoomPropKind | null>(null)
@@ -483,11 +487,10 @@ const App: React.FC = () => {
 
   // Boss interaction effect (shown above boss character)
   const [bossEffect, setBossEffect] = useState<string | null>(null)
-  const currentRoomDef = ROOMS[currentRoom]
-  const isStationRoom = currentRoom === 'station-command'
-  const isQuantumRoom = currentRoom === 'quantum-core'
-  const isGreenhouseRoom = currentRoom === 'orbital-greenhouse'
-  const isMainOfficeRoom = currentRoom === 'main-office'
+  const visibleRoom: RoomId = isActiveRoom(currentRoom) ? currentRoom : 'main-office'
+  const currentRoomDef = ROOMS[visibleRoom]
+  const isQuantumRoom = visibleRoom === 'quantum-core'
+  const isMainOfficeRoom = visibleRoom === 'main-office'
   const allOpsAgents = useMemo(
     () => [...agents, ...quantumAgents],
     [agents, quantumAgents],
@@ -497,6 +500,15 @@ const App: React.FC = () => {
     : null
   const selectedAgentTask = selectedAgent ? getTaskForAgent(selectedAgent, missionTasks) : undefined
   const caseStudyReady = missionTasks.some(task => task.id.includes(CASE_STUDY_TEMPLATE_ID))
+
+  useEffect(() => {
+    if (!isActiveRoom(currentRoom)) {
+      setCurrentRoom('main-office')
+      setRoomTransitioning(false)
+      setSelectedAgentId(null)
+      setOpenRoomProp(null)
+    }
+  }, [currentRoom])
 
   const handleFurnitureClick = useCallback((itemId: string) => {
     const interaction = getInteraction(itemId)
@@ -944,7 +956,7 @@ const App: React.FC = () => {
   }, [addMsg, allOpsAgents, missionTasks])
 
   const handleRoomTransition = useCallback((toRoom: RoomId) => {
-    if (toRoom === currentRoom) return
+    if (!isActiveRoom(toRoom) || toRoom === visibleRoom) return
     setRoomTransitioning(true)
     setSelectedAgentId(null)
     setOpenRoomProp(null)
@@ -961,7 +973,7 @@ const App: React.FC = () => {
     }, 120)
 
     setTimeout(() => setRoomTransitioning(false), 260)
-  }, [addMsg, currentRoom])
+  }, [addMsg, visibleRoom])
 
   useEffect(() => {
     let lastTick = Date.now()
@@ -2523,12 +2535,12 @@ const App: React.FC = () => {
     return item
   })
   const activeConnections = currentRoomDef.connections.filter(conn => {
-    if (currentRoom === 'main-office') return conn.toRoom === 'quantum-core'
-    if (currentRoom === 'quantum-core') return conn.toRoom === 'main-office'
+    if (visibleRoom === 'main-office') return conn.toRoom === 'quantum-core'
+    if (visibleRoom === 'quantum-core') return conn.toRoom === 'main-office'
     return false
   })
-  const visibleAgents = isStationRoom ? stationAgents : isQuantumRoom ? quantumAgents : isGreenhouseRoom ? greenhouseAgents : agents
-  const activeRoomProps = ROOM_PROP_HOTSPOTS.filter(prop => prop.roomId === currentRoom)
+  const visibleAgents = isQuantumRoom ? quantumAgents : agents
+  const activeRoomProps = ROOM_PROP_HOTSPOTS.filter(prop => prop.roomId === visibleRoom)
 
   // ---------------------------------------------------------------------------
   // Render — helper mode renders PlacementHelper in place of the full app
@@ -2622,12 +2634,12 @@ const App: React.FC = () => {
         >
           {/* Room backgrounds — both rendered, night crossfades via opacity. Theme swaps source art. */}
           <div
-            key={`day-${theme}-${currentRoom}`}
+            key={`day-${theme}-${visibleRoom}`}
             className="room-background"
             style={{ backgroundImage: `url(${roomDayImage})` }}
           />
           <div
-            key={`night-${theme}-${currentRoom}`}
+            key={`night-${theme}-${visibleRoom}`}
             className="room-background room-background-night"
             style={{
               backgroundImage: `url(${roomNightImage})`,
@@ -2645,7 +2657,7 @@ const App: React.FC = () => {
             const label = conn.label ?? ROOMS[conn.toRoom].name
             return (
               <button
-                key={`${currentRoom}-${conn.toRoom}`}
+                key={`${visibleRoom}-${conn.toRoom}`}
                 className="room-door-hotspot room-door-hotspot-subtle"
                 style={{ left: `${conn.position.x}%`, top: `${conn.position.y}%` }}
                 type="button"
