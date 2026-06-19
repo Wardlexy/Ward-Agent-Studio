@@ -13,6 +13,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { OfficeEvent } from '../types'
+import { apiUrl } from '../api'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -62,7 +63,7 @@ type ServerMessage = OfficeEvent | SnapshotMessage
 // ---------------------------------------------------------------------------
 
 const WS_URL         = 'ws://localhost:3334/ws'
-const ROSTER_URL     = 'http://localhost:3334/roster'
+const ROSTER_URL     = apiUrl('/roster')
 const MAX_EVENTS     = 50
 const BACKOFF_INITIAL = 500   // ms
 const BACKOFF_MAX    = 30_000 // ms

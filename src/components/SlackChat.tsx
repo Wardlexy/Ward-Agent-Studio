@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { ROLE_TO_CHAR } from '../config'
 import { getSpritePath, useTheme, toggleTheme, getTheme, themedDisplayName } from '../theme'
+import { apiUrl, isLocalAgentRuntime } from '../api'
 
 function getAvatarSrc(role: string, agentId?: string): string {
   const charBase = ROLE_TO_CHAR[role] ?? 'employee-3'
@@ -79,7 +80,8 @@ const SlackChat: React.FC<SlackChatProps> = ({ messages, muted, volume, onToggle
 
   // Load initial state from server
   useEffect(() => {
-    fetch('http://127.0.0.1:3334/chat/cron-state')
+    if (!isLocalAgentRuntime) return
+    fetch(apiUrl('/chat/cron-state'))
       .then(r => r.json())
       .then(d => setCronPaused(!!d.paused))
       .catch(() => {})
@@ -88,8 +90,9 @@ const SlackChat: React.FC<SlackChatProps> = ({ messages, muted, volume, onToggle
   const toggleCron = useCallback(() => {
     const newState = !cronPaused
     setCronPaused(newState)
+    if (!isLocalAgentRuntime) return
     // Update the state file via a simple POST
-    fetch('http://127.0.0.1:3334/chat/cron-state', {
+    fetch(apiUrl('/chat/cron-state'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ paused: newState }),

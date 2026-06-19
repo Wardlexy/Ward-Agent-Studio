@@ -20,6 +20,7 @@ import { createMissionFromTemplate, RECOMMENDED_STUDENT_TEMPLATE_ID } from './po
 import { CASE_STUDY_TEMPLATE_ID, caseStudyTerminalScript, createCaseStudyMissionTasks } from './portfolio/caseStudyData'
 import type { PortfolioArtifactResult } from './portfolio/types'
 import { useAgentSocket } from './hooks/useAgentSocket'
+import { apiUrl, agentWsUrl } from './api'
 import * as sfx from './sounds'
 import {
   assignSpot,
@@ -666,7 +667,7 @@ const App: React.FC = () => {
     ].slice(-220))
 
     try {
-      const response = await fetch('http://127.0.0.1:3334/portfolio/case-study', { method: 'POST' })
+      const response = await fetch(apiUrl('/api/portfolio/case-study'), { method: 'POST' })
       if (!response.ok) {
         const message = await response.text()
         throw new Error(message || `Artifact service failed with ${response.status}`)
@@ -749,7 +750,7 @@ const App: React.FC = () => {
     ].slice(-220))
 
     try {
-      const response = await fetch('http://127.0.0.1:3334/portfolio/project-audit', { method: 'POST' })
+      const response = await fetch(apiUrl('/api/portfolio/project-audit'), { method: 'POST' })
       if (!response.ok) {
         const message = await response.text()
         throw new Error(message || `Project audit failed with ${response.status}`)
@@ -1392,7 +1393,7 @@ const App: React.FC = () => {
   // WebSocket connection
   // ---------------------------------------------------------------------------
 
-  useAgentSocket({ onEvent: handleEvent, url: 'ws://localhost:3334/ws', disabled: isSimMode })
+  useAgentSocket({ onEvent: handleEvent, url: agentWsUrl, disabled: isSimMode || !agentWsUrl })
 
   // ---------------------------------------------------------------------------
   // Simulation loop — spawns/completes fake agents (only in ?sim mode)
@@ -2864,7 +2865,7 @@ const App: React.FC = () => {
           addMsg(bossCfg.title, BOSS_ROLE, bossCfg.color, text)
           setAutoTypeText(undefined)
           // Send to server so Codex can read it
-          fetch('http://127.0.0.1:3334/chat', {
+          fetch(apiUrl('/chat'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sender: bossCfg.title, text }),

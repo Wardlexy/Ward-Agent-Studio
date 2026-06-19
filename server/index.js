@@ -172,7 +172,7 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', agents: activeAgents.size, clients: wss?.clients.size ?? 0 })
 })
 
-app.post('/portfolio/case-study', (_req, res) => {
+function handleCaseStudyArtifact(_req, res) {
   try {
     const result = writeWardCaseStudyArtifacts(PROJECT_ROOT)
     const msg = addMessage({
@@ -186,9 +186,12 @@ app.post('/portfolio/case-study', (_req, res) => {
     console.error('[portfolio] case study artifact failed:', err)
     res.status(500).json({ error: err.message ?? 'Failed to write case study artifacts' })
   }
-})
+}
 
-app.post('/portfolio/project-audit', (_req, res) => {
+app.post('/portfolio/case-study', handleCaseStudyArtifact)
+app.post('/api/portfolio/case-study', handleCaseStudyArtifact)
+
+function handleProjectAudit(_req, res) {
   try {
     const result = writeWardProjectAudit(PROJECT_ROOT)
     const top = result.topProjects?.[0]
@@ -205,7 +208,10 @@ app.post('/portfolio/project-audit', (_req, res) => {
     console.error('[portfolio] project audit failed:', err)
     res.status(500).json({ error: err.message ?? 'Failed to write project audit' })
   }
-})
+}
+
+app.post('/portfolio/project-audit', handleProjectAudit)
+app.post('/api/portfolio/project-audit', handleProjectAudit)
 
 // MCP server roster
 app.get('/roster', (_req, res) => {
