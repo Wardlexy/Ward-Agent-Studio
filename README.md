@@ -4,6 +4,8 @@ Ward Agent Studio is a visual student portfolio and career lab for choosing bett
 
 It started from the Claude-Office concept and is being shaped into a portfolio-ready personal workspace for Ward: an isometric multi-room app where AI agents have visible roles, missions, progress, room-based behavior, and clickable status panels.
 
+![Ward Agent Studio — Main Office](docs/screenshots/main-office.png)
+
 ## What It Does
 
 - Shows a focused isometric agent workspace.
@@ -61,6 +63,12 @@ The main recommended mission is **Turn My Current Projects Into a Portfolio Plan
 - `docs/portfolio-audit/project-audit.json`
 
 ## Screenshots
+
+### Main Office
+
+The starting room: an isometric agent workspace with the live team chat panel and a clickable Agent Inspector showing each agent's role, current task, and progress.
+
+![Main Office](docs/screenshots/main-office.png)
 
 ### Main Office With Ward Mission Control
 
